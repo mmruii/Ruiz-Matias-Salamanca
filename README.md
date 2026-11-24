@@ -1,6 +1,7 @@
-# Salamanca · Entrega 3
+# Salamanca · Entrega 4
 
-Frontend React integrado con la API de productos de la Entrega 2.
+Sistema de panadería y cafetería con catálogo, pedidos para retirar y panel
+de administración, integrado con una API Express.
 
 ## Ejecutar
 
@@ -10,13 +11,13 @@ Desde la raíz del repositorio, en una terminal:
 
 ```bash
 npm --prefix backend install
+npm --prefix frontend install
 npm --prefix backend start
 ```
 
 En otra terminal:
 
 ```bash
-npm --prefix frontend install
 npm --prefix frontend run dev
 ```
 
@@ -83,6 +84,9 @@ Los textos editoriales del negocio no representan datos ficticios de productos.
 - Inicio con imagen de fondo, reservas por WhatsApp y productos desde la API.
 - Sobre nosotros con historia, horarios y enlace al mapa.
 - Catálogo con búsqueda sin acentos, filtro por categorías y detalle de productos.
+- Pedido para retirar: agregar productos, cambiar cantidades, quitar productos y
+  confirmar con nombre y teléfono. El comprobante muestra productos e importe.
+- Panel de pedidos para el administrador, con detalle, datos del cliente y total.
 - Panel interno en `/panel-de-control`, sin enlaces en la navegación pública.
 - Acceso con usuario y contraseña validados en el backend, cookie HttpOnly y cierre de sesión.
 - Creación, edición y eliminación confirmada de productos con nombre, stock,
@@ -120,7 +124,29 @@ categoría; el panel permite subir una foto específica. Fuentes de las fotos:
 
 Los datos de dirección, teléfono y horarios provienen del boceto original.
 El botón Reservar inicia una consulta por WhatsApp: no confirma una reserva
-ni guarda reservas en la API, que solo administra productos.
+ni guarda reservas en la API. El flujo integrado del sistema es el pedido de
+productos para retirar; no procesa pagos en línea ni reserva mesas.
+
+## Flujo de pedidos
+
+1. Configurar el administrador según la sección siguiente. En el panel, asignar
+   stock positivo a los productos que se quieran ofrecer: los productos
+   iniciales comienzan con stock cero.
+2. Abrir la carta, agregar productos y entrar a **Mi pedido**. Ajustar
+   cantidades e ingresar nombre y teléfono para confirmar.
+3. La API valida los datos, disponibilidad, stock y precio vigente. Si el precio
+   cambió, rechaza el pedido para que el cliente revise el nuevo importe. Un
+   pedido válido guarda el detalle y descuenta el stock en una sola escritura.
+4. El cliente recibe un comprobante en pantalla. El administrador puede iniciar
+   sesión en `/panel-de-control` y consultar o actualizar la lista de pedidos.
+   El pago se realiza en el local; no se realiza un cobro electrónico.
+
+El carrito y el comprobante se muestran durante la navegación actual y no
+constituyen una cuenta de cliente ni un historial personal. Si una confirmación
+queda sin respuesta, el intento se conserva en `sessionStorage` de esa pestaña:
+volver a **Mi pedido** y reintentar recupera el mismo pedido sin descontar stock
+dos veces. No cerrar la pestaña hasta resolver la confirmación. El historial
+persistente de pedidos está disponible únicamente para el administrador.
 
 ## Verificación
 
@@ -192,8 +218,8 @@ Sin usuario y clave válidos configurados, el backend mantiene el acceso bloquea
 Cambiar las credenciales requiere reiniciar el backend para revocar las sesiones anteriores.
 
 El stock admite enteros desde cero y se administra por separado del indicador
-Disponible en la carta. No se descuenta automáticamente porque no hay pedidos
-ni ventas en esta API. Los productos originales sin stock cargado comienzan en cero.
+Disponible en la carta. Se descuenta al confirmar un pedido. Los productos
+originales sin stock cargado comienzan en cero.
 La foto es opcional; se aceptan JPG, PNG y WebP de hasta 5 MB. El servidor valida
 el contenido real, limita la resolución de entrada y convierte a WebP con tamaño
 máximo de 1400 píxeles. En una edición sin archivo nuevo se conserva la foto actual.
@@ -271,6 +297,7 @@ Mantener ambas terminales abiertas y usar `Ctrl+C` en cada una para detenerlas.
 | Inicio | http://localhost:5173/ |
 | Sobre nosotros | http://localhost:5173/nosotros |
 | Catálogo de productos | http://localhost:5173/productos |
+| Pedido para retirar | http://localhost:5173/pedido |
 | Panel de control: ingreso y administración | http://localhost:5173/panel-de-control |
 | Ruta anterior de gestión: redirige al panel | http://localhost:5173/gestion |
 | Panel servido directamente por Express | http://localhost:3000/api/products |
@@ -289,6 +316,8 @@ editar y eliminar productos. Cualquier otra ruta muestra la página 404.
 | POST | http://localhost:3000/api/products | Crear producto, requiere sesión |
 | PUT | http://localhost:3000/api/products/1 | Editar producto por ID, requiere sesión |
 | DELETE | http://localhost:3000/api/products/1 | Borrar producto por ID, requiere sesión |
+| POST | http://localhost:3000/api/orders | Confirmar pedido y descontar stock |
+| GET | http://localhost:3000/api/orders | Consultar pedidos, requiere sesión |
 | GET | http://localhost:3000/api/admin/session | Consultar la sesión actual |
 | POST | http://localhost:3000/api/admin/login | Iniciar sesión con usuario y contraseña |
 | POST | http://localhost:3000/api/admin/logout | Cerrar sesión |

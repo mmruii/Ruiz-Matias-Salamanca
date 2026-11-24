@@ -70,3 +70,14 @@ export const formatPrice = (value) =>
     currency: 'ARS',
     maximumFractionDigits: 2,
   }).format(value);
+
+export const priceInCents = (value) =>
+  Number(
+    new Intl.NumberFormat('en-US', {
+      useGrouping: false,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+      .format(value)
+      .replace('.', ''),
+  );

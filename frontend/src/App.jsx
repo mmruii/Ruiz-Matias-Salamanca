@@ -6,6 +6,7 @@ import AboutPage from './pages/AboutPage.jsx';
 import ProductsPage from './pages/ProductsPage.jsx';
 import ManagePage from './pages/ManagePage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
+import OrderPage from './pages/OrderPage.jsx';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="nosotros" element={<AboutPage />} />
         <Route path="productos" element={<ProductsPage />} />
+        <Route path="pedido" element={<OrderPage />} />
         <Route
           path="panel-de-control"
           element={

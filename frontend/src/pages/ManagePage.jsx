@@ -11,6 +11,7 @@ import { useNotifications } from '../components/Notifications.jsx';
 import { useAdmin } from '../components/AdminProvider.jsx';
 import { filterProducts, formatPrice } from '../utils/products.js';
 import { uploadProductPhoto } from '../services/products.js';
+import AdminOrders from '../components/AdminOrders.jsx';
 
 export default function ManagePage() {
   const { products, loading, error, retry, saveProduct, removeProduct } = useProducts();
@@ -199,6 +200,7 @@ export default function ManagePage() {
           </table>
         </div>
       )}
+      <AdminOrders />
       {editor && (
         <Modal
           title={editor.product ? 'Editar producto' : 'Nuevo producto'}

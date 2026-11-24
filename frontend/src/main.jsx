@@ -5,6 +5,7 @@ import App from './App.jsx';
 import { NotificationProvider } from './components/Notifications.jsx';
 import { ProductsProvider } from './components/ProductsProvider.jsx';
 import { AdminProvider } from './components/AdminProvider.jsx';
+import { CartProvider } from './components/CartProvider.jsx';
 import '@fontsource-variable/fraunces';
 import '@fontsource-variable/mulish';
 import './styles/global.css';
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <NotificationProvider>
         <AdminProvider>
           <ProductsProvider>
-            <App />
+            <CartProvider>
+              <App />
+            </CartProvider>
           </ProductsProvider>
         </AdminProvider>
       </NotificationProvider>

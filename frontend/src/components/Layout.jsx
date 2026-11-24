@@ -21,6 +21,7 @@ export default function Layout() {
       '/': 'Inicio',
       '/nosotros': 'Sobre nosotros',
       '/productos': 'Productos',
+      '/pedido': 'Mi pedido',
       '/panel-de-control': 'Panel de control',
       '/api/products': 'Panel de control',
     };
@@ -63,6 +64,7 @@ export default function Layout() {
             </NavLink>
             <NavLink to="/nosotros">Sobre nosotros</NavLink>
             <NavLink to="/productos">Productos</NavLink>
+            <NavLink to="/pedido">Mi pedido</NavLink>
             <a
               className="button button-primary reservation"
               href={site.reservationLink}

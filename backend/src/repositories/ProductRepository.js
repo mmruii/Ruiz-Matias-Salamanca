@@ -1,4 +1,5 @@
 import Product from "../models/Product.js";
+import Order from "../models/Order.js";
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -51,7 +52,7 @@ export class ProductRepository {
       stored = JSON.parse(readFileSync(filePath, "utf8"));
     } catch (error) {
       if (error.code !== "ENOENT") throw error;
-      stored = { nextId: 4, products: initialProducts };
+      stored = { nextId: 4, products: initialProducts, orders: [] };
       this.persist(stored.products, stored.nextId);
     }
     if (
@@ -77,15 +78,40 @@ export class ProductRepository {
         "Los IDs del archivo de productos son invalidos. No se sobrescribio.",
       );
     }
+    if (stored.orders !== undefined && !Array.isArray(stored.orders)) {
+      throw new Error("El archivo de pedidos tiene un formato invalido. No se sobrescribio.");
+    }
+    this.orders = stored.orders || [];
+    const orderIds = new Set();
+    const requestIds = new Set();
+    for (const order of this.orders) {
+      if (!order || typeof order !== "object" || typeof order.id !== "string" ||
+          !order.id || orderIds.has(order.id) ||
+          typeof order.createdAt !== "string" || !Number.isFinite(Date.parse(order.createdAt)) ||
+          typeof order.customerName !== "string" || typeof order.phone !== "string" ||
+          !Array.isArray(order.items) || !order.items.length ||
+          !Number.isFinite(order.total) || order.total <= 0 ||
+          order.items.some((item) => !item || !Number.isSafeInteger(item.productId) ||
+            typeof item.name !== "string" || !Number.isSafeInteger(item.quantity) ||
+            item.quantity < 1 || !Number.isFinite(item.unitPrice) || item.unitPrice <= 0)) {
+        throw new Error("El archivo de pedidos tiene un formato invalido. No se sobrescribio.");
+      }
+      const request = Order.validate(order.request);
+      if (requestIds.has(request.requestId)) {
+        throw new Error("El archivo de pedidos contiene identificadores duplicados. No se sobrescribio.");
+      }
+      orderIds.add(order.id);
+      requestIds.add(request.requestId);
+    }
     this.nextId = stored.nextId;
   }
 
-  persist(products, nextId) {
+  persist(products, nextId, orders = this.orders || []) {
     mkdirSync(dirname(this.filePath), { recursive: true });
     const temporaryPath = `${this.filePath}.${randomUUID()}.tmp`;
     writeFileSync(
       temporaryPath,
-      JSON.stringify({ nextId, products }, null, 2),
+      JSON.stringify({ nextId, products, orders }, null, 2),
       { mode: 0o600 },
     );
     renameSync(temporaryPath, this.filePath);
@@ -97,6 +123,18 @@ export class ProductRepository {
 
   getById(id) {
     return this.products.find((product) => product.id === id) ?? null;
+  }
+
+  getOrders() {
+    return [...this.orders];
+  }
+
+  saveOrder(order, products) {
+    const orders = [...this.orders, order];
+    this.persist(products, this.nextId, orders);
+    this.products = products;
+    this.orders = orders;
+    return order;
   }
 
   create(product) {

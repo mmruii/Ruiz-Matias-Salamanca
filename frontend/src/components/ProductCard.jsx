@@ -1,8 +1,10 @@
 import { ArrowUpRight } from 'lucide-react';
 import ProductPhoto from './ProductPhoto.jsx';
 import { formatPrice } from '../utils/products.js';
+import { useCart } from './CartProvider.jsx';
 
 export default function ProductCard({ product, onSelect }) {
+  const { add } = useCart();
   return (
     <article className="product-card">
       <button
@@ -28,6 +30,18 @@ export default function ProductCard({ product, onSelect }) {
           <span className="price">{formatPrice(product.price)}</span>
         </div>
         <p>{product.description}</p>
+        <button
+          className="button button-secondary"
+          type="button"
+          disabled={!product.available || product.stock < 1}
+          onClick={() => add(product)}
+        >
+          {!product.available
+            ? 'No disponible'
+            : product.stock > 0
+              ? 'Agregar al pedido'
+              : 'Sin stock'}
+        </button>
       </div>
     </article>
   );

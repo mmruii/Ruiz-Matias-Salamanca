@@ -4,6 +4,7 @@ import { join } from "node:path";
 import productRoutes from "./routes/productRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 import { uploadsDirectory } from "./utils/uploads.js";
 import { adminSession } from "./middlewares/adminSession.js";
 import errorHandler from "./middlewares/errorHandler.js";
@@ -36,6 +37,7 @@ app.disable("x-powered-by");
 app.use(express.json({ limit: "32kb" }));
 app.use(adminSession);
 app.use("/api/admin", adminRoutes);
+app.use("/api/orders", orderRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use(
   "/api/uploads",
@@ -61,7 +63,7 @@ app.use(
   express.static(join(frontendDirectory, "assets"), { index: false }),
 );
 app.get(
-  ["/", "/nosotros", "/productos", "/panel-de-control", "/gestion"],
+  ["/", "/nosotros", "/productos", "/pedido", "/panel-de-control", "/gestion"],
   serveFrontend,
 );
 app.use(notFoundHandler);

@@ -59,7 +59,7 @@ un despliegue necesita un almacén persistente y configuración de proxy/HTTPS.
 El cuerpo para crear o modificar acepta `name`, `description`, `category`, `price`,
 `stock`, `imageUrl` y `available`. El stock debe ser un número entero no negativo
 (por defecto cero) y el precio un número mayor que cero. Para modificar se pueden
-enviar solo los campos que cambian. No se descuenta stock automáticamente.
+enviar solo los campos que cambian. El stock se descuenta al confirmar pedidos.
 
 GET es público. POST, PUT y DELETE requieren una sesión de administrador válida;
 sin ella devuelven 401. Ocultar los controles en React no reemplaza esta validación.
@@ -71,7 +71,7 @@ HTML explícito la ruta conserva el comportamiento JSON original.
 
 ## Persistencia
 
-Los datos se almacenan en `backend/data/products.json`, junto al siguiente ID.
+Los productos y pedidos se almacenan en `backend/data/products.json`, junto al siguiente ID.
 Las mutaciones escriben un archivo temporal y lo reemplazan atómicamente antes
 de devolver éxito. Al reiniciar se lee el mismo archivo; una lista vacía sigue
 vacía y los productos borrados no reaparecen. Los ejemplos solo se cargan si
@@ -80,6 +80,24 @@ el archivo todavía no existe. Si está corrupto, no se sobrescribe.
 Respaldar `data` y `uploads`, ambos ignorados por Git. El disco debe ser permanente
 en un despliegue. Este repositorio JSON admite una sola instancia del servidor;
 para varios procesos concurrentes usar una base de datos.
+
+## Pedidos para retirar
+
+| Método | Ruta | Acción |
+| --- | --- | --- |
+| POST | `/api/orders` | Confirmar un pedido público y descontar stock |
+| GET | `/api/orders` | Consultar pedidos; requiere sesión de administrador |
+
+El POST recibe `requestId` (UUID v4), `customerName`, `phone` e `items`, una
+lista de `{ productId, quantity, expectedUnitPrice }`. El servidor valida datos
+obligatorios, formato, duplicados, existencia, disponibilidad, stock y precio.
+Calcula el total con precios del servidor y guarda el pedido y los nuevos stocks
+en una única escritura atómica. Si el precio cambió, devuelve 409 para que el
+cliente lo revise. Reenviar el mismo `requestId` con los mismos datos devuelve
+el comprobante original sin descontar stock otra vez; reutilizarlo con otros
+datos devuelve 409. Los pedidos guardan una copia del nombre y precio de cada
+producto, incluso si luego se edita o elimina. No hay pago en línea ni gestión
+de reservas de mesa. El JSON y la sincronización son para una sola instancia.
 
 ## Fotos
 

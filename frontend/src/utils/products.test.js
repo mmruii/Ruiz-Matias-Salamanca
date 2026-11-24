@@ -1,6 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validatePhoto, validateProduct, productPayload, filterProducts } from './products.js';
+import {
+  validatePhoto,
+  validateProduct,
+  productPayload,
+  filterProducts,
+  priceInCents,
+} from './products.js';
 
 const values = {
   name: ' Cafe ',
@@ -57,4 +63,9 @@ test('busca sin distinguir acentos y combina categoria con texto', () => {
   assert.equal(filterProducts(products, ' CAFE ').length, 1);
   assert.equal(filterProducts(products, 'cafe', 'Panadería').length, 0);
   assert.equal(filterProducts(products, '', 'Panadería')[0].name, 'Croissant');
+});
+
+test('el total usa el mismo redondeo por unidad que el precio mostrado', () => {
+  assert.equal(priceInCents(1.005), 101);
+  assert.equal(priceInCents(1.004), 100);
 });
